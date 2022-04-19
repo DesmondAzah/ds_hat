@@ -246,8 +246,8 @@ class HatService extends Service {
         try{
             $hatTable = array();
             $hatChart = array();
-            $hatLevelRank = HatLevelRank::all();
-            $hatParentChild = HatParentChild::all();
+            $hatLevelRank = $this->hatLevelRankRepository->findAll(); 
+            $hatParentChild = $this->hatPcrRepository->findAll();
             $parentArray = $this->getUniqueParent($hatParentChild);
             $newPersonnel = $this->setPersonnel();
             foreach($parentArray as $parent){
@@ -258,6 +258,7 @@ class HatService extends Service {
                     $hatChart['hat'] = $parentObj->hat_level_rank_parent->name;
                     $hatChart['level'] = $this->getLevel($parentObj->hat_level_rank_parent->hat_level_id);
                     $hatChart['wearer'] =$this->setParentHatWerer($parentObj->hat_lr_parent,$hatLevelRank, $newPersonnel);
+                    $hatChart['reportsTo'] = 'N/A';
                     $hatChart['children']= $this->setSubHatTable($parent, $hatParentChild, $newPersonnel, $hatLevelRank);
                     // $hatChart[$parentObj->hat_level_rank_parent->name]['id'] = $parentObj->id;
                 }else{
@@ -265,6 +266,7 @@ class HatService extends Service {
                     $hatChart['hat'] = $parentObj->hat_level_rank_parent->name;
                     $hatChart['level'] = $this->getLevel($parentObj->hat_level_rank_parent->hat_level_id);
                     $hatChart['wearer'] =$this->setParentHatWerer($parentObj->hat_lr_parent,$hatLevelRank, $newPersonnel);
+                    $hatChart['reportsTo'] = $this->getParent($parent, $hatParentChild);
                     $hatChart['children']= $this->setSubHatTable($parent, $hatParentChild, $newPersonnel, $hatLevelRank);
                     //$hatChart[$parentObj->hat_level_rank_parent->name]['wearers'] =$this->setHatWerer($parentObj->hat_lr_parent,$hatLevelRank, $newPersonnel);
                     // $hatChart[$parentObj->hat_level_rank_parent->name]['children'][]= $this->setSubHat($parent, $hatParentChild, $newPersonnel, $hatLevelRank);
@@ -346,6 +348,16 @@ class HatService extends Service {
         foreach($hatLevelRank as $hlr){
             if($hlr->hat_lr_child == $parent){
                 return $hlr;
+            }
+        }
+        return false;
+    }
+
+    private function getParent($parent, $hatLevelRank){
+        foreach($hatLevelRank as $hlr){
+            if($hlr->hat_lr_child == $parent){
+                $hat = $this->hatLevelRankRepository->find($hlr->hat_lr_parent);
+                return $hat->name;
             }
         }
         return false;
