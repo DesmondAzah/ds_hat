@@ -19,28 +19,30 @@ $router->get('/', function () use ($router) {
 
  // Hat Routes
 $router->get('/hats', 'HatController@getHats');
-$router->get('/hats/{id}', 'HatController@getHat');
 $router->post('/hats', 'HatController@addHat');
-//$router->get('/hats/org_chart', 'HatController@getOrgChart');
+$router->get('/hats/completeHat', 'HatController@completeHat');
+$router->post('/hats/create', 'HatController@addCompleteHat');
 $router->post('/hats/setUpPc', 'HatController@setUpHatPC');
 $router->post('/hats/setUpLR', 'HatController@setUpHatLR');
 $router->post('/hats/setUpPersonnel', 'HatController@setUpPersonnel');
- $router->put('/hats/{id}', 'HatController@updateHat');
+$router->put('/hats/{id}', 'HatController@updateHat');
+$router->get('/hats/{id}', 'HatController@getHat');
+
 // $router->delete('/hats/{id}', 'HatController@deleteHat');
 
 // Hat Level Routes
 
 $router->get('/hatlevels', 'HatLevelController@getHatLevels');
-$router->get('/hatlevels/{id}', 'HatLevelController@getHatLevel');
 $router->post('/hatlevels', 'HatLevelController@addHatLevel');
+$router->get('/hatlevels/{id}', 'HatLevelController@getHatLevel');
 $router->put('/hatlevels/{id}', 'HatLevelController@updateHatLevel');
 $router->delete('/hatlevels/{id}', 'HatLevelController@deleteHatLevel');
 
 // Hat Rank Routes
 
 $router->get('/hatranks', 'HatRankController@getHatRanks');
-$router->get('/hatranks/{id}', 'HatRankController@getHatRank');
 $router->post('/hatranks', 'HatRankController@addHatRank');
+$router->get('/hatranks/{id}', 'HatRankController@getHatRank');
 $router->put('/hatranks/{id}', 'HatRankController@updateHatRank');
 $router->delete('/hatranks/{id}', 'HatRankController@deleteHatRank');
 
