@@ -259,14 +259,11 @@ class HatService extends Service {
                     $hatChart['wearer'] =$this->setParentHatWerer($parentObj->hat_lr_parent,$hatLevelRank, $newPersonnel);
                     $hatChart['children']= $this->setSubHat($parent, $hatParentChild, $newPersonnel, $hatLevelRank);
                     // $hatChart[$parentObj->hat_level_rank_parent->name]['id'] = $parentObj->id;
-                    error_log($parent." has no parent");
                 }else{
                     $parentObj = HatParentChild::where('hat_lr_parent', $parent)->first();
                     //$hatChart[$parentObj->hat_level_rank_parent->name]['wearers'] =$this->setHatWerer($parentObj->hat_lr_parent,$hatLevelRank, $newPersonnel);
                     // $hatChart[$parentObj->hat_level_rank_parent->name]['children'][]= $this->setSubHat($parent, $hatParentChild, $newPersonnel, $hatLevelRank);
-                    
-                    error_log($parent. " has parent");
-                }
+                                    }
             }
             
             if(empty($hatChart)){
@@ -400,7 +397,7 @@ class HatService extends Service {
     }
     private function getLevel($id){
                     $hatLevelName = $this->hatLevelRepository->find($id);
-                    return $hatLevelName->hat_level;
+                    return $hatLevelName->hat_level_description;
     }
 
     private function getPersonnel($personnel, $id){
