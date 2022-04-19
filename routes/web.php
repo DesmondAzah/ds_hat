@@ -50,3 +50,4 @@ $router->delete('/hatranks/{id}', 'HatRankController@deleteHatRank');
 // Hatting Chart
 
 $router->get('/hattingChart', 'HatController@hattingChart');
+$router->get('/hattingTable', 'HatController@hattingTable');
