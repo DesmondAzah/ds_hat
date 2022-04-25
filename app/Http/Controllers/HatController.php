@@ -128,6 +128,25 @@ class HatController extends Controller {
         return $hatService->getHats();
     }
 
+    /**
+     * PROCESS a request to get all hat details
+     * @param HatService $hatService
+     * * @param  $id
+     * @return Illuminate\Http\Response
+     */
+
+    public function getHatDetails($id, HatService $hatService){
+        return $hatService->getHatDetails($id);
+    }
+
+    /**
+     * PROCESS a request to get all hats
+     * @param HatService $hatService
+     * @return Illuminate\Http\Response
+     */
+    public function getAllHats(HatService $hatService){
+        return $hatService->getAllHats();
+    }
 
 
 }

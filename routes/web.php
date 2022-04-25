@@ -51,3 +51,5 @@ $router->delete('/hatranks/{id}', 'HatRankController@deleteHatRank');
 
 $router->get('/hattingChart', 'HatController@hattingChart');
 $router->get('/hattingTable', 'HatController@hattingTable');
+$router->get('/getAllHats', 'HatController@getAllHats');
+$router->get('/hatDetails/{id}', 'HatController@getHatDetails');

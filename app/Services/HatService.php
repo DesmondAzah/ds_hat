@@ -60,6 +60,36 @@ class HatService extends Service {
             return $this->errorResponse(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage());
         }
     }
+    public function getHatDetails($id){
+        try{
+            $hatDetails = $this->hatLevelRankRepository->find($id);
+            if(!$hatDetails) {
+                return $this->errorResponse( 'Hat not found', Response::HTTP_NOT_FOUND);
+            }
+            $hatObj = $this->setHatDetailsObj($hatDetails);
+            return $this->successResponse( $hatObj , 'Hat details', Response::HTTP_OK);
+        }catch (Exception $e){
+            return $this->errorResponse(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage());
+        }
+    }
+
+    public function getAllHats() {
+        // get all hat levels
+        try{
+            $hatObj = array();
+            $hatDetails = $this->hatLevelRankRepository->findAll();
+
+            if(!$hatDetails) {
+                return $this->errorResponse( 'Hat not found', Response::HTTP_NOT_FOUND);
+            }
+            foreach ($hatDetails as $hatDetail) {
+                $hatObj[] = $this->setHatDetailsObj($hatDetail);
+            }
+            return $this->successResponse( $hatObj , 'Hats ', Response::HTTP_OK);
+        }  catch (Exception $e) {
+            return $this->errorResponse( $e->getMessage(),Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
     
     public function addHat($hat) {
         // add new hat
@@ -265,7 +295,7 @@ class HatService extends Service {
             return $this->successResponse( $hatTable , 'Hating Chart ', Response::HTTP_OK);
         }  catch (Exception $e) {
             //error_log("error: ".print_r($e->getMessage(), true));
-            return $this->errorResponse(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage());
+            return $this->errorResponse($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
     public function hattingChart(){
@@ -558,6 +588,15 @@ class HatService extends Service {
         } catch (Exception $e) {
             return $this->errorResponse( $e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
+    }
+
+    private function setHatDetailsObj($hatDetails) {
+            $hatObj['id'] = $hatDetails->id;
+            $hatObj['hat'] = $this->hatRepository->find($hatDetails->hat_id);
+            $hatObj['level'] = $this->hatLevelRepository->find($hatDetails->hat_level_id);
+            $hatObj['rank'] = $this->hatRankRepository->find($hatDetails->hat_rank_id);
+            $hatObj['name'] = $hatDetails->name;
+            return $hatObj;
     }
 
     private function setPersonnel(){
