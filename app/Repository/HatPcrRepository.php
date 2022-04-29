@@ -14,4 +14,8 @@ class HatPcrRepository extends BaseRepository {
         return $this->model->where('hat_pcr_status', 1)->get();
     }
 
+    public function hatPcrExists($parentId,$childId){
+        return $this->model->where('hat_lr_parent', $parentId)->where('hat_lr_child', $childId)->first();
+    }
+
 }

@@ -26,7 +26,10 @@ $router->post('/hats/setUpPc', 'HatController@setUpHatPC');
 $router->post('/hats/setUpLR', 'HatController@setUpHatLR');
 $router->post('/hats/setUpPersonnel', 'HatController@setUpPersonnel');
 $router->put('/hats/{id}', 'HatController@updateHat');
+$router->put('/hats/update/{id}', 'HatController@updateCompleteHat');
 $router->get('/hats/{id}', 'HatController@getHat');
+$router->delete('/hats/personnelHats/{id}', 'HatController@deletePersonnelHats');
+
 
 // $router->delete('/hats/{id}', 'HatController@deleteHat');
 
