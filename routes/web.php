@@ -29,6 +29,9 @@ $router->put('/hats/{id}', 'HatController@updateHat');
 $router->put('/hats/update/{id}', 'HatController@updateCompleteHat');
 $router->get('/hats/{id}', 'HatController@getHat');
 $router->delete('/hats/personnelHats/{id}', 'HatController@deletePersonnelHats');
+$router->post('/hats/import', 'HatController@importData');
+$router->post('/hats/importHat', 'HatController@importHatData');
+
 
 
 // $router->delete('/hats/{id}', 'HatController@deleteHat');

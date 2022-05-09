@@ -20,11 +20,11 @@ class HatRankService extends Service {
             try{
                 $hatRanks = HatRanks::all();
                 if(!$hatRanks) {
-                    return $this->errorResponse(Response::HTTP_NOT_FOUND, 'Hat levels not found');
+                    return $this->errorResponse('Hat levels not found', Response::HTTP_NOT_FOUND);
                 }
                 return $this->successResponse( $hatRanks , 'Hats ranks', Response::HTTP_OK);
             } catch (Exception $e) {
-                return $this->errorResponse(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage());
+                return $this->errorResponse($e->getMessage(),Response::HTTP_INTERNAL_SERVER_ERROR);
             }
         }
         
@@ -33,11 +33,11 @@ class HatRankService extends Service {
             try{
                 $hatRank = HatRanks::find($id);
                 if(!$hatRank) {
-                    return $this->errorResponse(Response::HTTP_NOT_FOUND, 'Hat rank not found');
+                    return $this->errorResponse('Hat rank not found', Response::HTTP_NOT_FOUND);
                 }
                 return $this->successResponse( $hatRank , 'Hat rank', Response::HTTP_OK);
             } catch (Exception $e) {
-                return $this->errorResponse(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage());
+                return $this->errorResponse($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
             }
         }
         
@@ -64,7 +64,7 @@ class HatRankService extends Service {
                 $hatRank = $request;
                 $hatRankObj = HatRanks::find($id);
                 if(!$hatRankObj) {
-                    return $this->errorResponse(Response::HTTP_NOT_FOUND, 'Hat rank not found');
+                    return $this->errorResponse('Hat rank not found', Response::HTTP_NOT_FOUND);
                 }
                 $hatRankObj->fill($hatRank);
                 if($hatRankObj->isClean()) {
@@ -83,7 +83,7 @@ class HatRankService extends Service {
             try{
                 $hatRank = HatRanks::find($id);
                 if(!$hatRank) {
-                    return $this->errorResponse(Response::HTTP_NOT_FOUND, 'Hat rank not found');
+                    return $this->errorResponse('Hat rank not found', Response::HTTP_NOT_FOUND);
                 }
                 $hatRank->dt_updated = date('Y-m-d H:i:s');
                 $hatRank->hat_rank_status = false;

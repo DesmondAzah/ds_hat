@@ -8,10 +8,10 @@ class PersonnelDomain extends Domain {
     }
 
     public static function getPersonnel($id){
-        return (new PersonnelDomain)->internalRequest('GET', "/$id/personnel");
+        return (new PersonnelDomain)->dsRequest('GET', "/$id/personnel");
     }
 
     public static function getAllPersonnel(){
-        return (new PersonnelDomain)->internalRequest('GET', "/allPersonnel");
+        return (new PersonnelDomain)->dsRequest('GET', "/allPersonnel");
     }
 }

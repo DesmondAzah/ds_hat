@@ -11,8 +11,7 @@ class HatLevelRank extends Model {
     protected $fillable = [
         'hat_id',
         'hat_level_id',
-        'hat_rank_id',
-        'name',
+        'hat_rank_id'
     ];
 
     public function hat () {

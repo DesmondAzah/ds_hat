@@ -21,11 +21,11 @@ class HatLevelService extends Service {
         try{
             $hats = HatLevel::all();
             if(!$hats) {
-                return $this->errorResponse(Response::HTTP_NOT_FOUND, 'Hat levels not found');
+                return $this->errorResponse('Hat levels not found', Response::HTTP_NOT_FOUND);
             }
             return $this->successResponse( $hats , 'Hats levels', Response::HTTP_OK);
         }  catch (Exception $e) {
-            return $this->errorResponse(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage());
+            return $this->errorResponse($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
     
@@ -34,11 +34,11 @@ class HatLevelService extends Service {
         try{
             $hatLevel = HatLevel::find($id);
             if(!$hatLevel) {
-                return $this->errorResponse(Response::HTTP_NOT_FOUND, 'Hat level not found');
+                return $this->errorResponse('Hat level not found',Response::HTTP_NOT_FOUND);
             }
             return $this->successResponse( $hatLevel , 'Hat level', Response::HTTP_OK);
         }  catch (Exception $e) {
-            return $this->errorResponse(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage());
+            return $this->errorResponse( $e->getMessage(),Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
     
@@ -65,7 +65,7 @@ class HatLevelService extends Service {
             $hatLevel = $request;
             $hatLevelObj = HatLevel::find($id);
             if(!$hatLevelObj) {
-                return $this->errorResponse(Response::HTTP_NOT_FOUND, 'Hat level not found');
+                return $this->errorResponse( 'Hat level not found',Response::HTTP_NOT_FOUND);
             }
             $hatLevelObj->fill($hatLevel);
             if($hatLevelObj->isClean()) {
@@ -84,7 +84,7 @@ class HatLevelService extends Service {
         try{
             $hatLevel = HatLevel::find($id);
             if(!$hatLevel) {
-                return $this->errorResponse(Response::HTTP_NOT_FOUND, 'Hat level not found');
+                return $this->errorResponse('Hat level not found', Response::HTTP_NOT_FOUND);
             }
             $hatLevel->hat_level_status = false;
             $hatLevel->dt_updated = date('Y-m-d H:i:s');

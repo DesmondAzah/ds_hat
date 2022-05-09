@@ -1,6 +1,8 @@
 <?php
 
 require_once __DIR__.'/../vendor/autoload.php';
+require_once __DIR__.'/const.php';
+
 
 (new Laravel\Lumen\Bootstrap\LoadEnvironmentVariables(
     dirname(__DIR__)
@@ -22,9 +24,9 @@ date_default_timezone_set(env('APP_TIMEZONE', 'UTC'));
 $app = new Laravel\Lumen\Application(
     dirname(__DIR__)
 );
-
+class_alias('Maatwebsite\Excel\Facades\Excel', 'Excel');
  $app->withFacades();
-
+ $app->register('Maatwebsite\Excel\ExcelServiceProvider');
  $app->withEloquent();
 
 /*
@@ -94,7 +96,7 @@ $app->configure('domains');
 |
 */
 
-// $app->register(App\Providers\AppServiceProvider::class);
+$app->register(App\Providers\AppServiceProvider::class);
 // $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 

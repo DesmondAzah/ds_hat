@@ -308,7 +308,6 @@ class CompletedHatService extends Service {
             if(empty($hatChart)){
                 return $this->errorResponse( 'No hat relationship found', Response::HTTP_NOT_FOUND);
             }
-            error_log(print_r($hatChart, true));
             return $this->successResponse( $hatChart , 'Hating Chart ', Response::HTTP_OK);
         }  catch (Exception $e) {
             return $this->errorResponse( $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);

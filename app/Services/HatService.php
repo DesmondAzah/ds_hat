@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Imports\HatsImport;
 use App\Models\Hat;
 use App\Repository\HatLevelRepository;
 use App\Repository\HatRankRepository;
@@ -11,6 +12,7 @@ use App\Traits\ApiResponseHelper;
 use Exception;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
+
 
 class HatService extends Service {
     private HatRepository $hatRepository;
@@ -32,7 +34,7 @@ class HatService extends Service {
             $hats = $this->hatRepository->findAllActive();
             return $this->successResponse( $hats , 'Hats', Response::HTTP_OK);
         }  catch (Exception $e) {
-            return $this->errorResponse(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage());
+            return $this->errorResponse( $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
     
@@ -41,11 +43,11 @@ class HatService extends Service {
         try{
             $hat = $this->hatRepository->find($id);
             if(!$hat) {
-                return $this->errorResponse(Response::HTTP_NOT_FOUND, 'Hat not found');
+                return $this->errorResponse('Hat not found', Response::HTTP_NOT_FOUND);
             }
             return $this->successResponse( $hat , 'Hat', Response::HTTP_OK);
         }  catch (Exception $e) {
-            return $this->errorResponse(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage());
+            return $this->errorResponse( $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
     public function getHatDetails($id){
@@ -57,7 +59,7 @@ class HatService extends Service {
             $hatObj = $this->setHatDetailsObj($hatDetails);
             return $this->successResponse( $hatObj , 'Hat details', Response::HTTP_OK);
         }catch (Exception $e){
-            return $this->errorResponse(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage());
+            return $this->errorResponse($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -126,6 +128,7 @@ class HatService extends Service {
             return $this->errorResponse( $e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
     }
+
     private function setHatDetailsObj($hatDetails) {
             $hatObj['id'] = $hatDetails->id;
             $hatObj['hat'] = $this->hatRepository->find($hatDetails->hat_id);
@@ -142,5 +145,7 @@ class HatService extends Service {
             'hat_description' => 'required|string|max:255',
         ];
     }
+
+
 
 }

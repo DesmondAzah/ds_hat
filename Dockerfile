@@ -1,51 +1,25 @@
-FROM php:8-fpm-alpine3.14
+FROM registry.bon.dev/bon/docker/php_8.0-apache
 
-# for laravel lumen run smoothly
-RUN apk --no-cache add \
-php \
-php-fpm \
-php-pdo \
-php-mbstring \
-php-openssl
+# Customize any core extensions here
+#RUN apt-get update && apt-get install -y \
+#        libfreetype6-dev \
+#    && docker-php-ext-install -j$(nproc) iconv mcrypt \
+#    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
+#    && docker-php-ext-install -j$(nproc) gd
 
-# for our code run smoothly
-RUN apk --no-cache add \
-php-json \
-php-dom \
-curl \
-php-curl
+RUN apt-get update && apt-get install -y \
+        libzip-dev \
+    && docker-php-ext-install -j$(nproc) zip pdo pdo_mysql \
+    && docker-php-ext-enable pdo_mysql
 
-# for composer & our project depency run smoothly
-RUN apk --no-cache add \
-php-phar \
-php-xml \
-php-xmlwriter
+COPY --from=registry.bon.dev/bon/docker/composer /usr/bin/composer /usr/bin/composer
 
-# RUN apk --no-cache add \
-#       libzip-dev \
-#       zip \
-#     && docker-php-ext-install zip
-# if need composer to update plugin / vendor used
-RUN php -r "copy('http://getcomposer.org/installer', 'composer-setup.php');" && \
-php composer-setup.php --install-dir=/usr/bin --filename=composer && \
-php -r "unlink('composer-setup.php');"
+RUN sed -i 's/\/var\/www\/html/\/var\/www\/html\/public/' /etc/apache2/sites-enabled/000-default.conf
 
-# RUN ln -sf /usr/bin/php7 /usr/bin/php && \
-# ln -s /etc/php7/php.ini /etc/php7/conf.d/php.ini
+COPY . /var/www/html/
 
-# RUN set -x \
-# addgroup -g 82 -S www-data \
-# adduser -u 82 -D -S -G www-data www-data
+WORKDIR /var/www/html
 
-# copy all of the file in folder to /src
-COPY . /src
-WORKDIR /src
+RUN a2enmod rewrite
 
-RUN composer update
-
-#ADD .env.example /src/.env
-# RUN chmod -R 777 storage
-
-# run the php server service
-# move this command to -> docker-compose.yml
- CMD php -S 0.0.0.0:8006 public/index.php
+RUN composer install

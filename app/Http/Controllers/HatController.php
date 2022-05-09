@@ -171,5 +171,23 @@ class HatController extends Controller {
         return $hatService->getAllHats();
     }
 
+    /**
+     * PROCESS  excel data import
+     * @param  CompletedHatService $hatService
+     * @param Request $request
+     * @return Illuminate\Http\Response
+     */
+    public function importData(CompletedHatService $hatService){
+        return $hatService->importData(request()->all());
+    }
 
+    /**
+     * PROCESS  excel data import
+     * @param  CompletedHatService $hatService
+     * @param Request $request
+     * @return Illuminate\Http\Response
+     */
+    public function importHatData(CompletedHatService $hatService){
+        return $hatService->importHat(request()->all());
+    }
 }

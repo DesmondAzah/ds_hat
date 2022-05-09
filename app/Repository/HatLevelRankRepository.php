@@ -15,8 +15,8 @@ class HatLevelRankRepository extends BaseRepository {
             return $this->model->where('hat_level_rank_status', 1)->get();
         }
 
-        public function hatLevelRankExits($hat_id, $level_id, $rank_id, $title){
-            return $this->model->where('hat_id', $hat_id)->where('hat_level_id', $level_id)->where('hat_rank_id', $rank_id)->where('name', $title)->first();
+        public function hatLevelRankExits($hat_id, $level_id, $rank_id){
+            return $this->model->where('hat_id', $hat_id)->where('hat_level_id', $level_id)->where('hat_rank_id', $rank_id)->first();
 
         }
 
