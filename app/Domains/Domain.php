@@ -2,6 +2,7 @@
 
 namespace App\Domains;
 
+use App\Traits\ApiRequestHelper;
 use App\Traits\RequestTrait;
 use Exception;
 use Illuminate\Support\Facades\Cache;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Cache;
 class Domain {
 
     use RequestTrait;
+    use ApiRequestHelper;
     protected $baseUrl;
 
     /**

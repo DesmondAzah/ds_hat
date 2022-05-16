@@ -11,6 +11,7 @@ use App\Repository\HatLevelRankRepository;
 use App\Traits\ApiResponseHelper;
 use Exception;
 use Illuminate\Http\Response;
+use App\Helpers\ValidationHelper;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -20,6 +21,7 @@ class HatService extends Service {
     private HatRankRepository $hatRankRepository;
     private HatLevelRankRepository $hatLevelRankRepository;
     use ApiResponseHelper;
+    use ValidationHelper;
     public function __construct() {
         $this->hatRepository = app()->make(HatRepository::class);
         $this->hatLevelRepository = app()->make(HatLevelRepository::class);
@@ -84,7 +86,7 @@ class HatService extends Service {
     public function addHat($hat) {
         // add new hat
         try{
-             Validator::make($hat, $this->hatValidationRule())->validate();
+             Validator::make($hat, ValidationHelper::hatValidationRule())->validate();
              $hatObj = $this->hatRepository->getByColumn('hat_name', $hat['hat_name']);
              if($hatObj){
                  return $this->errorResponse( 'Hat name already exists', Response::HTTP_CONFLICT);
@@ -129,6 +131,42 @@ class HatService extends Service {
         }
     }
 
+    public static function findHatByName($name) {
+        // find hat level by name
+        try{
+            $hat = Hat::getByColumn('hat_name', $name);
+            if(!$hat) {
+                return false;
+            }
+            return $hat ;
+        }  catch (Exception $e) {
+            return false;
+        }
+    }
+
+    public static function findHatById($id) {
+        // find hat level by id
+        try{
+
+            $hat = Hat::find($id);
+            if(!$hat) {
+                return false;
+            }
+            return $hat ;
+        }  catch (Exception $e) {
+            return false;
+        }
+    }
+    public static function createHat($hat) {
+        // create new hat level
+        try{
+            $hat = Hat::create($hat);
+            return $hat ;
+        }  catch (Exception $e) {
+            return false;
+        }
+    }
+
     private function setHatDetailsObj($hatDetails) {
             $hatObj['id'] = $hatDetails->id;
             $hatObj['hat'] = $this->hatRepository->find($hatDetails->hat_id);
@@ -136,14 +174,6 @@ class HatService extends Service {
             $hatObj['rank'] = $this->hatRankRepository->find($hatDetails->hat_rank_id);
             $hatObj['name'] = $hatDetails->name;
             return $hatObj;
-    }
-
-    private function hatValidationRule() {
-        // validate hat level
-        return [
-            'hat_name' => 'required|string|max:255',
-            'hat_description' => 'required|string|max:255',
-        ];
     }
 
 

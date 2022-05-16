@@ -17,40 +17,53 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
- // Hat Routes
-$router->get('/hats', 'HatController@getHats');
-$router->post('/hats', 'HatController@addHat');
-$router->get('/hats/completeHat', 'HatController@completeHat');
-$router->post('/hats/create', 'HatController@addCompleteHat');
-$router->post('/hats/setUpPc', 'HatController@setUpHatPC');
-$router->post('/hats/setUpLR', 'HatController@setUpHatLR');
-$router->post('/hats/setUpPersonnel', 'HatController@setUpPersonnel');
-$router->put('/hats/{id}', 'HatController@updateHat');
-$router->put('/hats/update/{id}', 'HatController@updateCompleteHat');
-$router->get('/hats/{id}', 'HatController@getHat');
-$router->delete('/hats/personnelHats/{id}', 'HatController@deletePersonnelHats');
-$router->post('/hats/import', 'HatController@importData');
-$router->post('/hats/importHat', 'HatController@importHatData');
+$router->group(['prefix' => '/setupHat'], function() use($router){
+            $router->post('', 'HatSetupController@setUpHatLR');
+            $router->put('/{id}', 'HatSetupController@updateHatLRSetup');
+            $router->get('', 'HatSetupController@getAllHatSetups');
+            $router->get('/{id}', 'HatSetupController@getHatSetup');
+            $router->get('/hatTable', 'HatSetupController@getHatTable');
+            $router->get('/hatChart', 'HatSetupController@getHatChart');
+            //$router->get('/switchHatParent', 'HatSetupController@switchHatParent');
+ });
 
+ // Hat Routes
+ $router->group(['prefix' => '/hats'], function() use($router){
+$router->get('/', 'HatController@getHats');
+$router->post('/', 'HatController@addHat');
+$router->get('/completeHat', 'HatController@completeHat');
+$router->post('/setUpPc', 'HatController@setUpHatPC');
+$router->post('/setUpLR', 'HatController@setUpHatLR');
+$router->post('/setUpPersonnel', 'HatController@setUpPersonnel');
+$router->put('/{id}', 'HatController@updateHat');
+$router->put('/update/{id}', 'HatController@updateCompleteHat');
+$router->get('/{id}', 'HatController@getHat');
+$router->delete('/personnelHats/{id}', 'HatController@deletePersonnelHats');
+$router->post('/import', 'HatController@importData');
+$router->post('/importHat', 'HatController@importHatData');
+ });
 
 
 // $router->delete('/hats/{id}', 'HatController@deleteHat');
 
 // Hat Level Routes
-
-$router->get('/hatlevels', 'HatLevelController@getHatLevels');
-$router->post('/hatlevels', 'HatLevelController@addHatLevel');
-$router->get('/hatlevels/{id}', 'HatLevelController@getHatLevel');
-$router->put('/hatlevels/{id}', 'HatLevelController@updateHatLevel');
-$router->delete('/hatlevels/{id}', 'HatLevelController@deleteHatLevel');
+$router->group(['prefix' => '/hatLevels'], function() use($router){
+        $router->get('', 'HatLevelController@getHatLevels');
+        $router->post('', 'HatLevelController@addHatLevel');
+        $router->get('/{id}', 'HatLevelController@getHatLevel');
+        $router->put('/{id}', 'HatLevelController@updateHatLevel');
+        $router->delete('/{id}', 'HatLevelController@deleteHatLevel');
+ });
 
 // Hat Rank Routes
 
-$router->get('/hatranks', 'HatRankController@getHatRanks');
-$router->post('/hatranks', 'HatRankController@addHatRank');
-$router->get('/hatranks/{id}', 'HatRankController@getHatRank');
-$router->put('/hatranks/{id}', 'HatRankController@updateHatRank');
-$router->delete('/hatranks/{id}', 'HatRankController@deleteHatRank');
+$router->group(['prefix' => '/hatRanks'], function() use($router){
+    $router->get('', 'HatRankController@getHatRanks');
+    $router->post('', 'HatRankController@addHatRank');
+    $router->get('/{id}', 'HatRankController@getHatRank');
+    $router->put('/{id}', 'HatRankController@updateHatRank');
+    $router->delete('/{id}', 'HatRankController@deleteHatRank');
+});
 
 
 // Hatting Chart

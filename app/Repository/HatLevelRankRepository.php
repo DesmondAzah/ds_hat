@@ -20,4 +20,8 @@ class HatLevelRankRepository extends BaseRepository {
 
         }
 
+        public function getByColumns($columns, $values){
+            return $this->model->whereIn($columns, $values)->get();
+        }
+
     }

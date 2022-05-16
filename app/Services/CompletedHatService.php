@@ -17,6 +17,7 @@ use App\Repository\HatPcrRepository;
 use App\Repository\PersonnelHatRepository;
 use App\Repository\PersonnelHatHistoryRepository;
 use App\Traits\ApiResponseHelper;
+use App\Helpers\ValidationHelper;
 use Error;
 use Exception;
 use Illuminate\Http\Response;
@@ -286,24 +287,30 @@ class CompletedHatService extends Service {
             $hatLevelRank = HatLevelRank::all();
             $hatParentChild = HatParentChild::all();
             $parentArray = $this->getUniqueParent($hatParentChild);
+            error_log(print_r($parentArray, true));
             $newPersonnel = $this->setPersonnel();
-            $hasParent = $this->hasPerent($parentArray[0], $hatParentChild);
-            if(!$hasParent){
-                            $parentObj = $this->hatLevelRankRepository->find($parentArray[0]);
-                            if($this->getHatName($parentObj->hat_id) != 'N/A'){
-                            $hatChart['hat'] = $this->getHatName($parentObj->hat_id);
-                            $hatChart['level'] = $this->getLevel($parentObj->hat_level_id);
-                            $hatChart['wearer'] =$this->setParentHatWerer($parentObj->id,$hatLevelRank, $newPersonnel);
-                            $hatChart['reportsTo'] = 'N/A';
-                            $hatChart['id'] = $parentObj->id;
-                            $hasChildren = $this->hasChildren($parentArray[0], $hatParentChild);
-                            if($hasChildren){
-                            $hatChart['children']= $this->setSubHat($parentArray[0], $hatParentChild, $newPersonnel, $hatLevelRank);
+            foreach($parentArray as $parent){
+                $hasParent = $this->hasPerent($parent, $hatParentChild);
+                if(!$hasParent){
+                                $parentObj = $this->hatLevelRankRepository->find($parent);
+                                error_log(print_r($parentObj, true));
+                                if($this->getHatName($parentObj->hat_id) != 'N/A'){
+                                $hatChart['title'] = $this->getHatName($parentObj->hat_id);
+                                $hatChart['level'] = $this->getLevel($parentObj->hat_level_id);
+                                $hatChart['wearer'] =$this->setParentHatWerer($parentObj->id,$hatLevelRank, $newPersonnel);
+                                $hatChart['name'] = sizeof($this->setParentHatWerer($parentObj->id,$hatLevelRank, $newPersonnel)) > 0
+                                 ? $this->setParentHatWerer($parentObj->id,$hatLevelRank, $newPersonnel)[0]->full_name : 'N/A';
+                                $hatChart['reportsTo'] = 'N/A';
+                                $hatChart['id'] = $parentObj->id;
+                                $hasChildren = $this->hasChildren($parent, $hatParentChild);
+                                if($hasChildren){
+                                $hatChart['children']= $this->setSubHat($parent, $hatParentChild, $newPersonnel, $hatLevelRank);
+                                }
+                            }else{
+                                $hatChart = $this->setSubHat($parent, $hatParentChild, $newPersonnel, $hatLevelRank);
                             }
-                        }else{
-                            $hatChart = $this->setSubHat($parentArray[0], $hatParentChild, $newPersonnel, $hatLevelRank);
-                        }
-                    
+                        
+                }
             }
             if(empty($hatChart)){
                 return $this->errorResponse( 'No hat relationship found', Response::HTTP_NOT_FOUND);
@@ -334,25 +341,81 @@ class CompletedHatService extends Service {
             $imported = (new HatsImport)->toArray($file);
             foreach ($imported as $hat) {
             foreach($hat as $h){
-                if(!empty($h)){
+                if(!empty($h[0])){
+                    error_log($h[0].' '.$h[1].' '.$h[2].' '.$h[3].' '.$h[4]);
                     $hatFull = $this->findHatByName($h[3]);
-                    $hatChildId = $this->getHatLevelRankBy($hatFull->id);
-                    $hatParent = $this->findHatByName($h[4]);
-                    if(isset($hatParent->id)){
-                    $hatParentId = $this->getHatLevelRankBy($hatParent->id);
+                    //error_log($hatFull->id." - ". $h[8]." - ". $h[9]);
+                    $hatChildId = $this->getHatLevelRanky($hatFull->id, $h[8], $h[9]);
+                    //error_log('child object'.print_r($hatChildId, true));
+                    $hatFull = $this->findHatByName($h[4]);
+                    //error_log('parent object'.print_r($hatFull, true));
+                    $hatParentId = $this->getHatLevelRankBy($hatFull->id);
                     
-                    if($this->existByParentChild($hatParentId->id, $hatChildId->id) == 0){
-                        $parentChild['hat_lr_parent'] = $hatParentId->id;
-                        $parentChild['hat_lr_child'] = $hatChildId->id;
-                        $this->hatPcrRepository->create($parentChild);
+                    //error_log('parent object'.print_r($hatParentId, true));
+                    //error_log($h[0].' '.$h[1].' '.$h[2].' '.$h[3].' '.$h[4]);
+                    $hatPerson = $this->personnelHatRepository->personnelHatExits( $h[1], $hatParentId->id);
+                    //error_log(print_r($hatPerson, true));
+                    //error_log('hat person'.print_r($hatPerson, true));
+                    if($h[4] == "Board of Directors"){
+                        $parentChildExist = $this->hatPcrRepository->pcrExist( 0,  $hatChildId->id);
+                        error_log("exist array".print_r($parentChildExist, true));
+                        if(!isset($parentChildExist->id)){
+                            $parentChild['hat_lr_parent'] = 0;
+                            $parentChild['hat_lr_child'] = $hatChildId->id;
+                            //error_log('parent child'.print_r($parentChild, true));
+                            $this->hatPcrRepository->create($parentChild);
+
+                        }else{
+                            error_log("exist for first");
+                        }
+                    }else{
+                        $parentChildExist = $this->hatPcrRepository->pcrExist($hatPerson->id, $hatChildId->id);
+                        error_log("exist array".print_r($parentChildExist, true));
+                        if(!isset($parentChildExist->id)){
+                            error_log("id is missing". $hatPerson->id." - ");
+                            $parentChild['hat_lr_parent'] = $hatPerson->id;
+                            $parentChild['hat_lr_child'] = $hatChildId->id;
+                            //error_log('parent child'.print_r($parentChild, true));
+                            $this->hatPcrRepository->create($parentChild);
+                        }else{
+                            error_log("exist for sec");
+                        }
                     }
-                }else{
-                    if($this->existByParentChild(221, $hatChildId->id) == 0){
-                        $parentChild['hat_lr_parent'] = 221;
-                        $parentChild['hat_lr_child'] = $hatChildId->id;
-                        $this->hatPcrRepository->create($parentChild);
-                    }
-                }
+                    
+                    //error_log('hat personId: '.$hatPerson->id. ' hat child id'. $hatChildId->id);
+                   //if(!empty($hatChildId->id)){
+                   // $hatPersonnel['personnel_id'] = $h[0];
+                    //$hatPersonnel['hat_lr_id'] = $hatChildId->id;
+                    //$hatPerson = $this->personnelHatRepository->create($hatPersonnel);
+
+                   //}
+                    // error_log(print_r($hatPersonnel, true));
+
+                    //  $hatParent = $this->findHatByName($h[4]);
+                    //  if(isset($hatParent->id)){
+                    //     $hatLr = $this->getHatLevelRankBy($hatParent->id);
+                    //     $hatParentId = $this->personnelHatRepository->getByColumn('hat_lr_id', $hatLr->id);
+                    //     if(isset($hatParentId[0]->id)&& $this->existByParentChild($hatParentId[0]->id, $hatChildId->id) == 0){
+                    //             $parentChild['hat_lr_parent'] =$hatParentId[0]->id;
+                    //             $parentChild['hat_lr_child'] = $hatChildId->id;
+                    //             $this->hatPcrRepository->create($parentChild);
+                    //     } else if($this->existByParentChild(0, $hatChildId->id) == 0) {
+                    //             $parentChild['hat_lr_parent'] = 0;
+                    //             $parentChild['hat_lr_child'] = $hatChildId->id;
+                    //             $this->hatPcrRepository->create($parentChild);
+                    //     }
+                    //  }else{
+        
+                    //     if($this->existByParentChild(0, $hatChildId->id) == 0){
+                    //         error_log("Parent and child not found 3");
+                    //         $parentChild['hat_lr_parent'] = 0;
+                    //         $parentChild['hat_lr_child'] = $hatChildId->id;
+                    //         $this->hatPcrRepository->create($parentChild);
+                    //         $hatPersonnel['personnel_id'] = $h[0];
+                    //         $hatPersonnel['hat_lr_id'] = $hatChildId->id;
+                    //         //$this->personnelHatRepository->create($hatPersonnel);
+                    //     }
+                    // }
                 }
             }
         }
@@ -370,7 +433,8 @@ class CompletedHatService extends Service {
     }
     private function hatRankLevelExistBy($hatId, $levelId, $rankId){
         $hatLevelRank = $this->hatLevelRankRepository->hatLevelRankExits($hatId, $levelId, $rankId);
-        if(!isset($hatLevelRank->id)){
+        error_log(print_r($hatLevelRank, true));
+        if(empty($hatLevelRank->id)){
             return 0;
         }
         return 1;
@@ -383,6 +447,11 @@ class CompletedHatService extends Service {
         $hatLevelRank = $this->hatLevelRankRepository->getByColumn('hat_id', $hatId)->first();
         return $hatLevelRank;
     }
+    private function getHatLevelRanky($hatId, $levelId, $rankId){
+        return $this->hatLevelRankRepository->hatLevelRankExits($hatId, $levelId, $rankId);
+
+    }
+
     private function hatPersonnelExistBy($personnelId, $hatId){
         $hatPersonnel = $this->personnelHatRepository->personnelHatExits($personnelId, $hatId);
         if(!isset($hatPersonnel->id)){
@@ -403,12 +472,25 @@ class CompletedHatService extends Service {
             $imported = (new ImportHats)->toArray($file);
             foreach($imported as $hat){
                 foreach($hat as $h){
-
+                    //error_log(print_r($h, true));
+                    $hatFull = $this->findHatByName($h[3]);
+                    //error_log(print_r($hatFull, true));
+                    $hatExist =$this->hatLevelRankRepository->getByColumn('hat_id', $hatFull->id)->first();
+                    if(!isset($hatExist->id)){
+                                    $hatLevelRank['hat_id'] = $hatFull->id;
+                            $this->hatLevelRankRepository->create([
+                                'hat_id' => $hatFull->id,
+                                'hat_level_id' => $h[8],
+                                'hat_rank_id' => $h[9]
+                            ]);
+                }else{
+                    error_log("hat exist: ".print_r($hatExist, true));
+                }
                     if(!empty($h[0])){
-                      $hats['hat_name'] = $h[0];
-                      $hats['hat_description'] = $h[0];
-                      $this->hatRepository->create($hats);
-                        ///error_log(print_r($hats, true));
+                      //$hats['hat_name'] = $h[0];
+                      //$hats['hat_description'] = $h[0];
+                      //$this->hatRepository->create($hats);
+                       
                     }
                 }
             }
@@ -433,7 +515,7 @@ class CompletedHatService extends Service {
     }
     private function hasPerent($parent, $hatLevelRank){
         foreach($hatLevelRank as $hlr){
-            if($hlr->hat_lr_child == $parent){
+            if($hlr->hat_lr_child == $parent && $hlr->hat_lr_parent != $parent){
                 return $hlr;
             }
         }
@@ -490,16 +572,28 @@ class CompletedHatService extends Service {
     }
     private function setHatWerer($child, $hatLevelRank, $personnel, $hatParentChild){
         $children = array();
+        $final = array();
+        $personnel = array();
         foreach($hatLevelRank as $hlr){
             if($hlr->id == $child){
-                $children['hat']= $this->getHatName($hlr->hat_id);
-                $children['id'] = $hlr->id;
-                $children['reportsTo'] = $this->getParent($child, $hatParentChild);
-                $children['level'] = $this->getLevel($hlr->hat_level_id);
-                $children['wearer'] = $this->getPersonnel($personnel, $hlr->id);
+                empty($personnel) ? $personnel[] = $this->getPersonnel($personnel, $hlr->id) : array_push($personnel, $this->getPersonnel($personnel, $hlr->id));
+                // foreach($personnel as $p){
+                //     //$children[] = $p->personnel_id;
+                //     error_log("this is the personnel: ".print_r($personnel, true));
+                //     $children['title'] = $this->getHatName($hlr->hat_id);
+                //     $children['hat']= $this->getHatName($hlr->hat_id);
+                //     $children['id'] = $hlr->id;
+                //     $children['reportsTo'] = $this->getParent($child, $hatParentChild);
+                //     $children['level'] = $this->getLevel($hlr->hat_level_id);
+                //     $children['name'] = $p["full_name"];
+                //     array_push($final, $children);
+                // }
+               
+                //$final['wearer'] = $personnel;
             }
         }
-        return $children;
+        error_log("this is the personnel: ".print_r($personnel, true));
+        return $final;
     }
     private function setParentHatWerer($child, $hatLevelRank, $personnel){
         $children = array();
@@ -515,18 +609,19 @@ class CompletedHatService extends Service {
         $children = array();
         foreach($hatParentChild as $hpc){
             $newChild = array();
-            if($hpc->hat_lr_parent == $parent){
+            if($hpc->hat_lr_parent == $parent && $hpc->hat_lr_child != $parent){
                 if($this->hasChildren($hpc->hat_lr_child, $hatParentChild)){
                     $parentObj = $this->hatLevelRankRepository->find($hpc->hat_lr_child);
-                    $newChild['hat'] = $this->getHatName($parentObj->hat_id);
+                    $newChild['title'] = $this->getHatName($parentObj->hat_id);
                     $newChild['level'] = $this->getLevel($parentObj->hat_level_id);
                     $newChild['reportsTo'] = $this->getParent($hpc->hat_lr_child, $hatParentChild);
                     $newChild['wearer'] =$this->setParentHatWerer($hpc->hat_lr_child,$hatLevelRank, $personnel);
+                    $newChild['name'] = sizeof($this->setParentHatWerer($hpc->hat_lr_child,$hatLevelRank, $personnel)) > 0 ? $this->setParentHatWerer($hpc->hat_lr_child,$hatLevelRank, $personnel)[0]['full_name'] : 'null';
                     $newChild['id'] = $hpc->hat_lr_child;
                    $newChild['children']= $this->setSubHat($parentObj->id, $this->unsetCollection($hatParentChild, $hpc->id), $personnel, $hatLevelRank);
 
                 }else{
-                $newChild = $this->setHatWerer($hpc->hat_lr_child, $hatLevelRank, $personnel, $hatParentChild);
+                $newChild['children'] = $this->setHatWerer($hpc->hat_lr_child, $hatLevelRank, $personnel, $hatParentChild);
                 }
                 array_push($children,$newChild);
             }
@@ -571,6 +666,7 @@ class CompletedHatService extends Service {
 
     private function getPersonnel($personnel, $id){
         $person = array();
+        
             $personnelHat = PersonnelHat::where('hat_lr_id', $id)->get();
             foreach($personnelHat as $ph){
               if(array_key_exists($ph->personnel_id, $personnel)){
@@ -629,7 +725,6 @@ class CompletedHatService extends Service {
            $data['hat_id'] = $request['hat'];
            $data['hat_level_id'] = $hatLevelRank['level'];
            $data['hat_rank_id'] = $hatLevelRank['rank'];
-           $data['name'] = $hatLevelRank['title'];
            $hatLevelRankObj = $this->hatLevelRankRepository->create($data);
             return $hatLevelRankObj;
         } catch (Exception $e) {

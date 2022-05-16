@@ -18,4 +18,17 @@ class HatPcrRepository extends BaseRepository {
         return $this->model->where('hat_lr_parent', $parentId)->where('hat_lr_child', $childId)->first();
     }
 
+    public function getByColumns($columns, $values){
+        return $this->model->whereIn($columns, $values)->get();
+    }
+    public function findUniqueParents(){
+        return $this->model->select('hat_lr_parent')->distinct()->get();
+    }
+
+    public function hasParent ($childId){
+        return $this->model->where('hat_lr_child', $childId)->first();
+    }
+    public function pcrExist($hatLrParent, $hatLrChild){
+        return $this->model->where('hat_lr_parent', $hatLrParent)->where('hat_lr_child', $hatLrChild)->first();
+    }
 }

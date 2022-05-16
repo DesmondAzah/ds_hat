@@ -14,7 +14,7 @@ class HatParentChild extends Model {
         ];
 
     public function hat_level_rank_parent () {
-        return $this->belongsTo(HatLevelRank::class, 'hat_lr_parent');
+        return $this->belongsTo(PersonnelHat::class, 'hat_lr_parent');
     }   
 
     public function hat_level_rank_child () {

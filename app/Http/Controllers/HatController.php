@@ -170,7 +170,6 @@ class HatController extends Controller {
     public function getAllHats(HatService $hatService){
         return $hatService->getAllHats();
     }
-
     /**
      * PROCESS  excel data import
      * @param  CompletedHatService $hatService

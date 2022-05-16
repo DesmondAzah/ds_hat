@@ -38,6 +38,7 @@ trait RequestTrait {
                 CURLOPT_RESOLVE => [$curl_resolve]
             ]
         ];
+        error_log(print_r($curl_option, true));
         $response = $client->request($method, $requestUrl, $curl_option);
         $contents = $response->getBody()->getContents();
         $decoded_content = json_decode($contents, true);
